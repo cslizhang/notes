@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My GitHub Blog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #content {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Blog</h1>
+    <div id="directory">
+        <!-- 目录将在这里生成 -->
+    </div>
+    <div id="content">
+        <!-- Markdown内容将在这里显示 -->
+    </div>
+
+    <script>
+        // 获取目录
+        function fetchDirectory() {
+            fetch('/README.md')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    const directory = document.getElementById('directory');
+                    lines.forEach(line => {
+                        if (line.startsWith('* [')) {
+                            const link = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
+                            if (link) {
+                                const title = link[1];
+                                const href = link[2];
+                                const a = document.createElement('a');
+                                a.href = href;
+                                a.textContent = title;
+                                directory.appendChild(a);
+                                directory.appendChild(document.createElement('br'));
+                            }
+                        }
+                    });
+                });
+        }
+
+        // 显示Markdown内容
+        function showMarkdown(href) {
+            fetch(href)
+                .then(response => response.text())
+                .then(data => {
+                    const contentDiv = document.getElementById('content');
+                    contentDiv.innerHTML = marked(data);
+                });
+        }
+
+        // 监听目录点击事件
+        document.getElementById('directory').addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                showMarkdown(e.target.href);
+            }
+        });
+
+        // 初始化目录
+        fetchDirectory();
+    </script>
+
+    <!-- 引入marked库用于Markdown转换 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
